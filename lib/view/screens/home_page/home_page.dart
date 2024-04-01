@@ -1,9 +1,11 @@
 import 'package:my_todo_app/headers.dart';
+import 'package:my_todo_app/utills/helpers/db_helper.dart';
 
 class HomePage extends StatelessWidget {
   HomePage({super.key});
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  TextEditingController taskController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +75,7 @@ class HomePage extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          inseryMyTask(context, textScaler, h);
+          myDailyTasks(context, textScaler, h);
         },
         shape: const CircleBorder(),
         backgroundColor: const Color(0xff8687E7),
@@ -86,7 +88,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Future<dynamic> inseryMyTask(
+  Future<dynamic> myDailyTasks(
       BuildContext context, TextScaler textScaler, double h) {
     return showDialog(
       context: context,
@@ -104,6 +106,7 @@ class HomePage extends StatelessWidget {
             child: Form(
               key: formKey,
               child: TextFormField(
+                controller: taskController,
                 validator: (val) =>
                     val!.isEmpty ? "Enter your daily task" : null,
                 decoration: const InputDecoration(
@@ -121,8 +124,23 @@ class HomePage extends StatelessWidget {
           ),
           actions: [
             IconButton.outlined(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {}
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  String title = taskController.text;
+                  int res = await DBHelper.dbHelper.insertMyTask(title: title);
+
+                  if (res >= 1) {
+                    SnackBar snackBar = SnackBar(
+                      content: Text("$res data insert Successfully 😁"),
+                      backgroundColor: Colors.green,
+                      margin: const EdgeInsets.all(8),
+                      behavior: SnackBarBehavior.floating,
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    Navigator.pop(context);
+                    taskController.clear();
+                  }
+                }
               },
               icon: const Icon(Icons.send),
             )
