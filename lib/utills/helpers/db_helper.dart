@@ -1,11 +1,12 @@
 import 'dart:developer';
 
 import 'package:my_todo_app/headers.dart';
+import 'package:my_todo_app/utills/models/todo_model.dart';
 
 mixin Todos {
   Future<void> initDB();
   Future<int> insertMyTask({required String title});
-  void getMyTasks();
+  Future<List<TodoModel>> getMyTasks();
   void updateMyTasks({required int id, required String title});
   void deleteMyTasks({required int id});
 }
@@ -44,13 +45,29 @@ class DBHelper with Todos {
   Future<int> insertMyTask({required String title}) async {
     await initDB();
 
-    String query = "INSERT INTO $tableName ($tableTitle) VALUES(?)";
-    List args = [title];
-    return await db!.rawInsert(query, args);
+    // String query = "INSERT INTO $tableName ($tableTitle) VALUES(?)";
+    // List args = [title];
+    // return await db!.rawInsert(query, args);
+
+    Map<String, dynamic> data = {
+      tableTitle: title,
+    };
+
+    return await db!.insert(
+      tableName,
+      data,
+    );
   }
 
   @override
-  void getMyTasks() {}
+  Future<List<TodoModel>> getMyTasks() async {
+    await initDB();
+    String query = "SELECT * FROM $tableName;";
+
+    List<Map<String, dynamic>> data = await db!.rawQuery(query);
+
+    return data.map((e) => TodoModel.fromMap(data: e)).toList();
+  }
 
   @override
   void updateMyTasks({required int id, required String title}) {}

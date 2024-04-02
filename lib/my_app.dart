@@ -1,3 +1,6 @@
+import 'package:my_todo_app/utills/controllers/todo_controller.dart';
+import 'package:provider/provider.dart';
+
 import 'headers.dart';
 
 class MyApp extends StatelessWidget {
@@ -5,9 +8,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      routes: MyRoutes.routes,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => TodoController(),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        routes: MyRoutes.routes,
+      ),
     );
   }
 }
