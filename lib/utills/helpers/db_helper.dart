@@ -1,14 +1,14 @@
 import 'dart:developer';
 
 import 'package:my_todo_app/headers.dart';
-import 'package:my_todo_app/utills/models/todo_model.dart';
 
 mixin Todos {
   Future<void> initDB();
   Future<int> insertMyTask({required String title});
   Future<List<TodoModel>> getMyTasks();
-  void updateMyTasks({required int id, required String title});
-  void deleteMyTasks({required int id});
+  Future<int> updateMyTasks({required int id, required String title});
+  Future<int> deleteMyTasks({required int id});
+  void searchMyTasks({required String title});
 }
 
 class DBHelper with Todos {
@@ -70,8 +70,36 @@ class DBHelper with Todos {
   }
 
   @override
-  void updateMyTasks({required int id, required String title}) {}
+  Future<int> updateMyTasks({required int id, required String title}) async {
+    await initDB();
+    // String query = "UPDATE $tableName SET $tableTitle = ? WHERE $tableId = ?";
+    // return await db!.rawUpdate(query, [title, id]);
+    return await db!.update(
+      tableName,
+      {tableTitle: title},
+      where: "$tableId = ?",
+      whereArgs: [id],
+    );
+  }
 
   @override
-  void deleteMyTasks({required int id}) {}
+  Future<int> deleteMyTasks({required int id}) async {
+    await initDB();
+    // String query = "DELETE FROM $tableName WHERE $tableId = ?";
+    // return await db!.rawDelete(query, [id]);
+    return await db!.delete(
+      tableName,
+      where: "$tableId = ?",
+      whereArgs: [id],
+    );
+  }
+
+  @override
+  Future<List<TodoModel>> searchMyTasks({required String title}) async {
+    await initDB();
+    String query = "SELECT * FROM $tableName WHERE $tableTitle LIKE '%$title%'";
+
+    List<Map<String, dynamic>> data = await db!.rawQuery(query);
+    return data.map((e) => TodoModel.fromMap(data: e)).toList();
+  }
 }
